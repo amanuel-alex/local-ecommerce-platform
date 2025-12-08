@@ -1,124 +1,235 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { 
-  Home, 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  Settings, 
-  BarChart,
-  Store,
-  Bell,
-  HelpCircle,
-  LogOut
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { ThemeSwitcher } from '@/components/theme/theme-switcher'
+import { Search, Bell, ShoppingCart, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Badge } from '@/components/ui/badge'
 
-const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Products', href: '/dashboard/products', icon: Package },
-  { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
-  { name: 'Customers', href: '/dashboard/customers', icon: Users },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart },
-  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-]
+interface DashboardNavbarProps {
+  user: any
+}
 
-export function DashboardNav() {
-  const pathname = usePathname()
+export default function DashboardNavbar({ user }: DashboardNavbarProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <nav className="w-64 bg-sidebar border-r min-h-screen p-4 flex flex-col">
-      {/* Logo */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <Store className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Local Market
-            </h1>
-            <p className="text-sm text-muted-foreground">Seller Dashboard</p>
-          </div>
-        </div>
-      </div>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center px-4 md:px-6">
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden mr-2"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
+        </Button>
 
-      {/* Navigation */}
-      <div className="flex-1">
-        <ul className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
-            return (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group",
-                    isActive 
-                      ? "bg-gradient-to-r from-primary/10 to-secondary/10 text-primary border-l-4 border-primary" 
-                      : "hover:bg-accent"
-                  )}
-                >
-                  <Icon className={cn(
-                    "w-5 h-5 transition-transform group-hover:scale-110",
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  )} />
-                  <span className={cn(
-                    "font-medium",
-                    isActive ? "text-primary" : ""
-                  )}>
-                    {item.name}
-                  </span>
-                  {isActive && (
-                    <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  )}
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 mr-6">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+            <ShoppingCart className="h-5 w-5 text-white" />
+          </div>
+          <span className="font-bold text-xl hidden md:inline-block">MarketHub</span>
+        </Link>
 
-        {/* Quick Stats */}
-        <div className="mt-8 p-4 rounded-lg bg-gradient-to-br from-primary/5 to-secondary/5 border">
-          <h3 className="font-semibold mb-2">Today&apos;s Stats</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Orders</span>
-              <span className="font-semibold text-primary">12</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Revenue</span>
-              <span className="font-semibold text-emerald-500">$1,245</span>
-            </div>
+        {/* Search Bar */}
+        <div className="flex-1 mx-4">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search products, orders, customers..."
+              className="pl-10"
+            />
           </div>
         </div>
-      </div>
 
-      {/* Bottom Section */}
-      <div className="space-y-4 pt-4 border-t">
-        {/* Theme Switcher */}
-        <div className="flex items-center justify-between px-2">
-          <span className="text-sm text-muted-foreground">Theme</span>
-          <ThemeSwitcher />
-        </div>
-
-        {/* User Menu */}
-        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary" />
-          <div className="flex-1">
-            <p className="text-sm font-medium">John Seller</p>
-            <p className="text-xs text-muted-foreground">Premium Seller</p>
-          </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <LogOut className="h-4 w-4" />
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Cart */}
+          <Button variant="ghost" size="icon" className="relative">
+            <ShoppingCart className="h-5 w-5" />
+            <Badge 
+              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+              variant="destructive"
+            >
+              3
+            </Badge>
           </Button>
+
+          {/* Notifications */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                <Badge 
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                  variant="destructive"
+                >
+                  5
+                </Badge>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <div className="flex flex-col">
+                  <span className="font-medium">New order received</span>
+                  <span className="text-sm text-muted-foreground">Order #12345 just came in</span>
+                  <span className="text-xs text-muted-foreground">2 minutes ago</span>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <div className="flex flex-col">
+                  <span className="font-medium">Payment received</span>
+                  <span className="text-sm text-muted-foreground">$125.00 from John Doe</span>
+                  <span className="text-xs text-muted-foreground">1 hour ago</span>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <div className="flex flex-col">
+                  <span className="font-medium">New customer registered</span>
+                  <span className="text-sm text-muted-foreground">Jane Smith joined the platform</span>
+                  <span className="text-xs text-muted-foreground">3 hours ago</span>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="justify-center text-primary">
+                View all notifications
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User Profile */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="gap-2">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-sm font-medium">
+                    {user?.user_metadata?.full_name?.[0] || 'U'}
+                  </span>
+                </div>
+                <div className="hidden md:flex flex-col items-start">
+                  <span className="text-sm font-medium">
+                    {user?.user_metadata?.full_name || 'User'}
+                  </span>
+                  <span className="text-xs text-muted-foreground capitalize">
+                    {user?.role || 'customer'}
+                  </span>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/${user?.role || 'customer'}/profile`}>
+                  Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/${user?.role || 'customer'}/settings`}>
+                  Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/help">
+                  Help & Support
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive">
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-    </nav>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t">
+          <div className="p-4 space-y-2">
+            <Link
+              href={`/dashboard/${user?.role || 'customer'}`}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <span>Dashboard</span>
+            </Link>
+            {user?.role === 'customer' && (
+              <>
+                <Link
+                  href="/dashboard/customer/orders"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>My Orders</span>
+                </Link>
+                <Link
+                  href="/dashboard/customer/wishlist"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Wishlist</span>
+                </Link>
+              </>
+            )}
+            {user?.role === 'seller' && (
+              <>
+                <Link
+                  href="/dashboard/seller/products"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Products</span>
+                </Link>
+                <Link
+                  href="/dashboard/seller/orders"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Orders</span>
+                </Link>
+              </>
+            )}
+            {user?.role === 'admin' && (
+              <>
+                <Link
+                  href="/dashboard/admin/users"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Users</span>
+                </Link>
+                <Link
+                  href="/dashboard/admin/sellers"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Sellers</span>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
   )
 }
