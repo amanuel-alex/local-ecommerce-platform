@@ -120,3 +120,49 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+@layer components {
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent;
+  }
+  
+  .glow-effect {
+    @apply relative;
+  }
+  
+  .glow-effect::after {
+    content: '';
+    @apply absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 blur-xl -z-10;
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}

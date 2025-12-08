@@ -10,8 +10,7 @@ import { FloatingElements } from '../components/ui/floating-elements'
 export default function HomePage() {
   return (
     <>
-      <SparklesBackground />
-      <FloatingElements />
+    
       
       <div className="relative z-10">
         <HeroSection />
