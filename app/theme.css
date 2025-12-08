@@ -1,0 +1,83 @@
+/* Theme variables only */
+:root {
+  /* Base colors - using OKLCH for modern color system */
+  --primary: oklch(0.55 0.2 240);
+  --primary-foreground: oklch(0.98 0.01 240);
+  
+  --secondary: oklch(0.97 0.02 240);
+  --secondary-foreground: oklch(0.3 0.05 240);
+  
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  
+  --muted: oklch(0.97 0.02 240);
+  --muted-foreground: oklch(0.55 0.05 240);
+  
+  --accent: oklch(0.97 0.02 240);
+  --accent-foreground: oklch(0.3 0.05 240);
+  
+  --destructive: oklch(0.7 0.2 20);
+  --destructive-foreground: oklch(0.98 0.01 20);
+  
+  --border: oklch(0.9 0.03 240);
+  --input: oklch(0.9 0.03 240);
+  --ring: oklch(0.55 0.2 240);
+  
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  
+  --primary: oklch(0.8 0.1 240);
+  --primary-foreground: oklch(0.2 0.05 240);
+  
+  --secondary: oklch(0.3 0.04 240);
+  --secondary-foreground: oklch(0.9 0.02 240);
+  
+  --muted: oklch(0.3 0.04 240);
+  --muted-foreground: oklch(0.7 0.04 240);
+  
+  --accent: oklch(0.3 0.04 240);
+  --accent-foreground: oklch(0.9 0.02 240);
+  
+  --border: oklch(0.3 0.04 240);
+  --input: oklch(0.3 0.04 240);
+  --ring: oklch(0.55 0.15 240);
+}
+
+/* Theme variants */
+
+
+/* Dark mode theme variants */
+.dark.theme-emerald {
+  --primary: oklch(0.7 0.15 150);
+  --ring: oklch(0.7 0.15 150);
+}
+
+.dark.theme-rose {
+  --primary: oklch(0.7 0.15 350);
+  --ring: oklch(0.7 0.15 350);
+}
+
+.dark.theme-amber {
+  --primary: oklch(0.8 0.15 70);
+  --ring: oklch(0.8 0.15 70);
+}
+
+.dark.theme-violet {
+  --primary: oklch(0.7 0.15 280);
+  --ring: oklch(0.7 0.15 280);
+}
+
+.dark.theme-cyan {
+  --primary: oklch(0.7 0.15 200);
+  --ring: oklch(0.7 0.15 200);
+}

@@ -28,37 +28,43 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protect admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
+  // Auth routes that should be accessible only to logged out users
+  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password']
+  if (authRoutes.includes(request.nextUrl.pathname)) {
+    if (user) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
-    
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    
-    if (userData?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url))
-    }
+    return supabaseResponse
   }
 
-  // Protect seller routes
-  if (request.nextUrl.pathname.startsWith('/seller')) {
+  // Protected routes
+  const protectedRoutes = ['/dashboard', '/profile', '/settings', '/seller']
+  if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
     if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      const redirectUrl = new URL('/login', request.url)
+      redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(redirectUrl)
     }
-    
+
+    // Role-based access control
     const { data: userData } = await supabase
       .from('users')
       .select('role')
       .eq('id', user.id)
       .single()
-    
-    if (!['seller', 'admin'].includes(userData?.role || '')) {
-      return NextResponse.redirect(new URL('/unauthorized', request.url))
+
+    // Seller routes
+    if (request.nextUrl.pathname.startsWith('/seller')) {
+      if (userData?.role !== 'seller' && userData?.role !== 'admin') {
+        return NextResponse.redirect(new URL('/unauthorized', request.url))
+      }
+    }
+
+    // Admin routes
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+      if (userData?.role !== 'admin') {
+        return NextResponse.redirect(new URL('/unauthorized', request.url))
+      }
     }
   }
 
@@ -67,9 +73,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/seller/:path*',
-    '/dashboard/:path*',
-    '/checkout/:path*',
+    '/((?!api|_next/static|_next/image|favicon.ico|images).*)',
   ],
 }

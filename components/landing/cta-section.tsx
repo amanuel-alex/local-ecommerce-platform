@@ -124,7 +124,7 @@ export default function CTASection() {
             transition={{ duration: 0.5 }}
             className="max-w-2xl mx-auto"
           >
-            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-8 shadow-2xl">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-white-900 dark:to-gray-800 rounded-2xl p-8 shadow-2xl">
               <h3 className="text-2xl font-bold mb-6">Get Started in Seconds</h3>
               
               {subscribed ? (
