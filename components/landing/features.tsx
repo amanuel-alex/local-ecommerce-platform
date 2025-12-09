@@ -18,7 +18,7 @@ const features = [
     icon: Shield,
     title: 'Secure Payments',
     description: 'Bank-level security for all transactions',
-    color: 'from-blue-500 to-cyan-500'
+    color: 'from-blue-300 to-cyan-500'
   },
   {
     icon: Truck,
@@ -88,39 +88,43 @@ export default function FeaturesSection() {
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10, scale: 1.05 }}
-            >
-              <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                
-                <CardContent className="p-8 text-center">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.color} mb-6`}
-                  >
-                    <feature.icon className="w-8 h-8 text-white" />
-                  </motion.div>
-                  
-                  <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                  
-                  <motion.div
-                    className="mt-6 h-1 w-0 group-hover:w-full bg-gradient-to-r from-transparent via-primary to-transparent transition-all duration-500"
-                    initial={false}
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+  {features.map((feature, index) => (
+    <motion.div
+      key={index}
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -10, scale: 1.05 }}
+    >
+      <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+        <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+        
+        <CardContent className="p-8 text-center">
+          <motion.div
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.6 }}
+            className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.color} mb-6`}
+          >
+            <feature.icon className="w-8 h-8 text-white" />
+          </motion.div>
+          
+          <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-gray-100">
+            {feature.title}
+          </h3>
+          <p className="text-gray-700 dark:text-gray-300">
+            {feature.description}
+          </p>
+          
+          <motion.div
+            className="mt-6 h-1 w-0 group-hover:w-full bg-gradient-to-r from-transparent via-primary to-transparent transition-all duration-500"
+            initial={false}
+          />
+        </CardContent>
+      </Card>
+    </motion.div>
+  ))}
+</div>
 
         {/* Interactive Stats Counter */}
         <motion.div

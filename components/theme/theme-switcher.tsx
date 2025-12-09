@@ -52,8 +52,8 @@ export function ThemeSwitcher() {
           <span className="sr-only">Switch theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+      <DropdownMenuContent align="end" className="w-48 bg-slate-100 text-black">
+        <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground ">
           Theme
         </div>
         {themes.map((themeOption) => (
