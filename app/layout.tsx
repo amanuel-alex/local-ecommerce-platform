@@ -1,15 +1,14 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Providers } from '@/components/providers'
-import { Toaster } from '@/components/ui/sonner'
-import { Header } from '@/components/layout/header'
+import { Toaster } from 'sonner'
+import { AuthProvider } from '@/contexts/auth-context'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Local Market - Connect with Local Sellers',
-  description: 'Digital marketplace connecting local sellers with customers',
+  title: 'MarketHub - E-commerce Platform',
+  description: 'Professional e-commerce platform for buyers and sellers',
 }
 
 export default function RootLayout({
@@ -20,11 +19,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Providers>
-          <Header />
+        <AuthProvider>
           {children}
-          <Toaster />
-        </Providers>
+        </AuthProvider>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            className: 'bg-background text-foreground border',
+            duration: 5000,
+          }}
+        />
       </body>
     </html>
   )
