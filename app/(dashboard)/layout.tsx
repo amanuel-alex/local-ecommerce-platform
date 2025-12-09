@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { toast } from 'sonner'
 import DashboardNavbar from '@/components/dashboard/nav'
 import DashboardSidebar from '@/components/dashboard/sidebar'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Store, ShoppingCart, Home } from 'lucide-react'
+import Link from 'next/link'
 
 export default function DashboardLayout({
   children,
@@ -18,6 +21,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const supabase = createClient()
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     checkUser()
@@ -70,6 +74,9 @@ export default function DashboardLayout({
     setSidebarOpen(!sidebarOpen)
   }
 
+  // Check if we're on the main dashboard page
+  const isMainDashboard = pathname === '/dashboard'
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardNavbar user={user} />
@@ -81,8 +88,7 @@ export default function DashboardLayout({
         )}>
           <div className="sticky top-16 h-[calc(100vh-4rem)]">
             <DashboardSidebar 
-              role={user?.role} 
-              // Pass toggle function if needed
+              role={user?.role}
             />
           </div>
         </div>
@@ -92,6 +98,51 @@ export default function DashboardLayout({
           "flex-1 p-4 md:p-6 transition-all duration-300",
           sidebarOpen ? "ml-0" : "md:ml-16"
         )}>
+          {/* Quick Navigation Bar (only show if not on main dashboard) */}
+          {!isMainDashboard && (
+            <div className="mb-6 p-3 bg-muted rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link href="/dashboard">
+                  <Button variant="ghost" size="sm">
+                    <Home className="h-4 w-4 mr-2" />
+                    Browse Products
+                  </Button>
+                </Link>
+                {user?.role === 'seller' && (
+                  <Link href="/dashboard/seller/products">
+                    <Button variant="ghost" size="sm">
+                      <Store className="h-4 w-4 mr-2" />
+                      My Products
+                    </Button>
+                  </Link>
+                )}
+                {user?.role === 'customer' && (
+                  <Link href="/dashboard/customer/orders">
+                    <Button variant="ghost" size="sm">
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      My Orders
+                    </Button>
+                  </Link>
+                )}
+                {user?.role === 'admin' && (
+                  <Link href="/dashboard/admin/users">
+                    <Button variant="ghost" size="sm">
+                      <Store className="h-4 w-4 mr-2" />
+                      Manage Users
+                    </Button>
+                  </Link>
+                )}
+              </div>
+              {/* Removed the filteredProducts line that was causing the error */}
+              {isMainDashboard && (
+                <div className="text-sm text-muted-foreground">
+                  {/* Product count will be shown in the page component, not here */}
+                  Marketplace
+                </div>
+              )}
+            </div>
+          )}
+          
           {children}
         </main>
       </div>

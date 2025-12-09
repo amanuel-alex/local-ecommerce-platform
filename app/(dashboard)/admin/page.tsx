@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
         .single()
 
       if (userData?.role !== 'admin') {
-        router.push('/dashboard')
+        router.push('/product-show')
         return
       }
 

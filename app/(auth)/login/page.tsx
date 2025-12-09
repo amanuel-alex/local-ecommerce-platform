@@ -60,7 +60,7 @@ export default function LoginPage() {
         description: 'Successfully logged in.',
       })
       
-      router.push('/dashboard')
+      router.push('/product-show')
       router.refresh()
     } catch (error: any) {
       toast.error('Login failed', {
