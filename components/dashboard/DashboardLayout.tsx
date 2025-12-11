@@ -14,13 +14,14 @@ import Link from 'next/link'
 interface DashboardLayoutProps {
   children: React.ReactNode
   role: 'admin' | 'seller' | 'customer'
+  user: any
 }
 
 export default function DashboardLayout({ 
   children, 
-  role 
+  role,
+  user 
 }: DashboardLayoutProps) {
-  const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const supabase = createClient()
@@ -33,18 +34,24 @@ export default function DashboardLayout({
 
   const checkUser = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/auth/login')
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) {
+        router.push('/login') // Changed from '/auth/login' to '/login'
         return
       }
       
       // Verify user role matches the layout role
-      const { data: userData } = await supabase
+      const { data: userData, error } = await supabase
         .from('users')
         .select('role, full_name')
-        .eq('id', user.id)
+        .eq('id', authUser.id)
         .single()
+
+      if (error) {
+        console.error('Error fetching user data:', error)
+        router.push('/complete-profile')
+        return
+      }
 
       if (!userData) {
         router.push('/complete-profile')
@@ -57,13 +64,13 @@ export default function DashboardLayout({
         // Redirect to correct dashboard
         switch (userData.role) {
           case 'admin':
-            router.push('/dashboard/admin')
+            router.push('/admin')
             break
           case 'seller':
-            router.push('/dashboard/seller')
+            router.push('/seller')
             break
           case 'customer':
-            router.push('/dashboard/customer')
+            router.push('/customer')
             break
           default:
             router.push('/')
@@ -71,17 +78,11 @@ export default function DashboardLayout({
         return
       }
 
-      setUser({ 
-        ...user, 
-        role: userData.role,
-        user_metadata: {
-          ...user.user_metadata,
-          full_name: userData.full_name
-        }
-      })
+      // User is authenticated and has correct role
     } catch (error) {
       console.error('Error loading dashboard:', error)
       toast.error('Error loading dashboard')
+      router.push('/login')
     } finally {
       setLoading(false)
     }
@@ -103,7 +104,7 @@ export default function DashboardLayout({
   const getQuickNavLinks = () => {
     const baseLinks = [
       {
-        href: '/dashboard',
+        href: '/product-show',
         label: 'Browse Products',
         icon: Home,
         variant: 'ghost' as const
@@ -114,19 +115,19 @@ export default function DashboardLayout({
       return [
         ...baseLinks,
         {
-          href: '/dashboard/seller/products',
+          href: '/seller/products', // Fixed: Added leading slash
           label: 'My Products',
           icon: Store,
           variant: 'ghost' as const
         },
         {
-          href: '/dashboard/seller/orders',
+          href: '/seller/orders',
           label: 'Orders',
           icon: ShoppingCart,
           variant: 'ghost' as const
         },
         {
-          href: '/dashboard/seller/settings',
+          href: '/seller/settings',
           label: 'Store Settings',
           icon: Settings,
           variant: 'ghost' as const
@@ -138,19 +139,19 @@ export default function DashboardLayout({
       return [
         ...baseLinks,
         {
-          href: '/dashboard/admin/users',
+          href: '/admin/users',
           label: 'Users',
           icon: Users,
           variant: 'ghost' as const
         },
         {
-          href: '/dashboard/admin/sellers',
+          href: '/admin/sellers',
           label: 'Sellers',
           icon: Store,
           variant: 'ghost' as const
         },
         {
-          href: '/dashboard/admin/settings',
+          href: '/admin/settings',
           label: 'Settings',
           icon: Settings,
           variant: 'ghost' as const
@@ -162,13 +163,13 @@ export default function DashboardLayout({
     return [
       ...baseLinks,
       {
-        href: '/dashboard/customer/orders',
+        href: '/customer/orders',
         label: 'My Orders',
         icon: ShoppingCart,
         variant: 'ghost' as const
       },
       {
-        href: '/dashboard/customer/wishlist',
+        href: '/customer/wishlist',
         label: 'Wishlist',
         icon: Store,
         variant: 'ghost' as const
@@ -177,7 +178,7 @@ export default function DashboardLayout({
   }
 
   const quickNavLinks = getQuickNavLinks()
-  const isMainDashboard = pathname === '/dashboard'
+  const isMainDashboard = pathname === '/product-show'
 
   return (
     <div className="min-h-screen bg-background">
@@ -208,15 +209,14 @@ export default function DashboardLayout({
               <div className="flex items-center gap-2 flex-wrap">
                 {quickNavLinks.map((link) => {
                   const Icon = link.icon
+                  const isActive = pathname === link.href || pathname.startsWith(link.href)
+                  
                   return (
                     <Link key={link.href} href={link.href}>
                       <Button 
-                        variant={link.variant} 
+                        variant={isActive ? "secondary" : "ghost"}
                         size="sm"
-                        className={cn(
-                          "gap-2",
-                          pathname === link.href && "bg-accent"
-                        )}
+                        className="gap-2"
                       >
                         <Icon className="h-4 w-4" />
                         {link.label}

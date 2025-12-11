@@ -1,30 +1,26 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { 
-  Home, 
-  ShoppingBag, 
-  Heart, 
-  Settings, 
-  User,
-  Store, 
-  Package, 
-  BarChart3, 
-  Users,
-  Shield,
-  CreditCard,
-  MapPin,
+import { cn } from '@/lib/utils'
+import {
+  BarChart3,
+  Bell,
   ChevronLeft,
   ChevronRight,
-  LayoutDashboard,
+  CreditCard,
   FileText,
-  Bell,
-  HelpCircle
+  Heart,
+  HelpCircle,
+  MapPin,
+  Package,
+  Settings,
+  ShoppingBag,
+  Store,
+  User,
+  Users
 } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 interface DashboardSidebarProps {
   role: 'admin' | 'seller' | 'customer'
@@ -39,68 +35,63 @@ export default function DashboardSidebar({
 }: DashboardSidebarProps) {
   const pathname = usePathname()
 
-  // Common navigation items
-  const commonNav = [
-    { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  ]
-
+  
   // Customer navigation
   const customerNav = [
-    { title: 'My Orders', href: '/dashboard/customer/orders', icon: ShoppingBag },
-    { title: 'Wishlist', href: '/dashboard/customer/wishlist', icon: Heart },
-    { title: 'Campaigns', href: '/dashboard/customer/campaigns', icon: BarChart3 },
+    { title: 'My Orders', href: '/customer/orders', icon: ShoppingBag },
+    { title: 'Wishlist', href: '/customer/wishlist', icon: Heart },
+    { title: 'Campaigns', href: '/customer/campaigns', icon: BarChart3 },
   ]
 
   // Customer settings
   const customerSettings = [
-    { title: 'Profile', href: '/dashboard/customer/profile', icon: User },
-    { title: 'Addresses', href: '/dashboard/customer/addresses', icon: MapPin },
-    { title: 'Payments', href: '/dashboard/customer/payments', icon: CreditCard },
-    { title: 'Settings', href: '/dashboard/customer/settings', icon: Settings },
+    { title: 'Profile', href: '/customer/profile', icon: User },
+    { title: 'Addresses', href: '/customer/addresses', icon: MapPin },
+    { title: 'Payments', href: '/customer/payments', icon: CreditCard },
+    { title: 'Settings', href: '/customer/settings', icon: Settings },
   ]
 
   // Seller navigation
   const sellerNav = [
-    { title: 'Store', href: '/dashboard/seller/store', icon: Store },
-    { title: 'Products', href: '/dashboard/seller/products', icon: Package },
-    { title: 'Orders', href: '/dashboard/seller/orders', icon: ShoppingBag },
-    { title: 'Customers', href: '/dashboard/seller/customers', icon: Users },
-    { title: 'Analytics', href: '/dashboard/seller/analytics', icon: BarChart3 },
+    { title: 'Store', href: '/seller/store', icon: Store },
+    { title: 'Products', href: '/seller/products', icon: Package },
+    { title: 'Orders', href: '/seller/orders', icon: ShoppingBag },
+    { title: 'Customers', href: '/seller/customers', icon: Users },
+    { title: 'Analytics', href: '/seller/analytics', icon: BarChart3 },
   ]
 
   // Seller settings
   const sellerSettings = [
-    { title: 'Store Settings', href: '/dashboard/seller/settings', icon: Settings },
-    { title: 'Notifications', href: '/dashboard/seller/notifications', icon: Bell },
+    { title: 'Store Settings', href: '/seller/settings', icon: Settings },
+    { title: 'Notifications', href: '/seller/notifications', icon: Bell },
   ]
 
   // Admin navigation
   const adminNav = [
-    { title: 'Users', href: '/dashboard/admin/users', icon: Users },
-    { title: 'Sellers', href: '/dashboard/admin/sellers', icon: Store },
-    { title: 'Products', href: '/dashboard/admin/products', icon: Package },
-    { title: 'Orders', href: '/dashboard/admin/orders', icon: ShoppingBag },
-    { title: 'Analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
+    { title: 'Users', href: '/admin/users', icon: Users },
+    { title: 'Sellers', href: '/admin/sellers', icon: Store },
+    { title: 'Products', href: '/admin/products', icon: Package },
+    { title: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+    { title: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   ]
 
   // Admin settings
   const adminSettings = [
-    { title: 'System Settings', href: '/dashboard/admin/settings', icon: Settings },
-    { title: 'Logs', href: '/dashboard/admin/logs', icon: FileText },
-    { title: 'Help & Support', href: '/dashboard/admin/support', icon: HelpCircle },
+    { title: 'System Settings', href: '/admin/settings', icon: Settings },
+    { title: 'Logs', href: '/admin/logs', icon: FileText },
+    { title: 'Help & Support', href: '/admin/support', icon: HelpCircle },
   ]
 
   // Get navigation items based on role
   const getNavItems = () => {
     switch (role) {
       case 'admin':
-        return [...commonNav, ...adminNav]
+        return [...adminNav]
       case 'seller':
-        return [...commonNav, ...sellerNav]
+        return [ ...sellerNav]
       case 'customer':
-        return [...commonNav, ...customerNav]
-      default:
-        return commonNav
+        return [ ...customerNav]
+      
     }
   }
 

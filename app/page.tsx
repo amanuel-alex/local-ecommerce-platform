@@ -7,6 +7,7 @@ import { ProductTabs } from '@/components/products/product-tabs'
 import { ProductGrid } from '@/components/products/product-grid'
 import { getRecentProducts, getTopSellingProducts, getTrendingProducts, getFeaturedProducts } from '@/lib/supabase/products'
 import { mockProducts } from '@/lib/mock/products'
+import { Header } from '@/components/layout/header'
 
 // For development, use mock data. In production, use real data
 async function getProducts() {
@@ -48,6 +49,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen">
+      <Header/>
       <HeroSection />
       
       {/* Featured Products Section */}
