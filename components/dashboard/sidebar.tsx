@@ -4,269 +4,237 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import { 
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
+  Home, 
+  ShoppingBag, 
+  Heart, 
+  Settings, 
+  User,
+  Store, 
+  Package, 
+  BarChart3, 
   Users,
-  Store,
-  BarChart3,
-  Settings,
-  LogOut,
+  Shield,
+  CreditCard,
+  MapPin,
   ChevronLeft,
   ChevronRight,
-  User,
-  CreditCard,
-  Heart,
+  LayoutDashboard,
+  FileText,
   Bell,
-  HelpCircle,
-  Home,
-  ShoppingBag
+  HelpCircle
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
 
 interface DashboardSidebarProps {
   role: 'admin' | 'seller' | 'customer'
+  sidebarOpen: boolean
+  onToggle: () => void
 }
 
-// Common item for all roles - Main Products Page
-const commonNavItems = [
-  { href: '/dashboard', label: 'Browse Products', icon: ShoppingBag },
-]
-
-const customerNavItems = [
-  { href: '/dashboard', label: 'Browse Products', icon: ShoppingBag },
-  { href: '/dashboard/customer', label: 'My Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/customer/orders', label: 'My Orders', icon: ShoppingCart },
-  { href: '/dashboard/customer/wishlist', label: 'Wishlist', icon: Heart },
-  { href: '/dashboard/customer/addresses', label: 'Addresses', icon: Package },
-  { href: '/dashboard/customer/payments', label: 'Payments', icon: CreditCard },
-  { href: '/dashboard/customer/notifications', label: 'Notifications', icon: Bell },
-  { href: '/dashboard/customer/settings', label: 'Settings', icon: Settings },
-  { href: '/dashboard/customer/help', label: 'Help Center', icon: HelpCircle },
-]
-
-const sellerNavItems = [
-  { href: '/dashboard', label: 'Browse Products', icon: ShoppingBag },
-  { href: '/dashboard/seller', label: 'Seller Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/seller/products', label: 'My Products', icon: Package },
-  { href: '/dashboard/seller/orders', label: 'Orders', icon: ShoppingCart },
-  { href: '/dashboard/seller/customers', label: 'Customers', icon: Users },
-  { href: '/dashboard/seller/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/dashboard/seller/store', label: 'Store Settings', icon: Store },
-  { href: '/dashboard/seller/settings', label: 'Settings', icon: Settings },
-]
-
-const adminNavItems = [
-  { href: '/dashboard', label: 'Browse Products', icon: ShoppingBag },
-  { href: '/dashboard/admin', label: 'Admin Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/admin/users', label: 'Users', icon: Users },
-  { href: '/dashboard/admin/sellers', label: 'Sellers', icon: Store },
-  { href: '/dashboard/admin/products', label: 'Products', icon: Package },
-  { href: '/dashboard/admin/orders', label: 'Orders', icon: ShoppingCart },
-  { href: '/dashboard/admin/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/dashboard/admin/settings', label: 'Settings', icon: Settings },
-]
-
-export default function DashboardSidebar({ role }: DashboardSidebarProps) {
-  const [collapsed, setCollapsed] = useState(false)
+export default function DashboardSidebar({ 
+  role, 
+  sidebarOpen, 
+  onToggle 
+}: DashboardSidebarProps) {
   const pathname = usePathname()
-  const router = useRouter()
-  const supabase = createClient()
 
+  // Common navigation items
+  const commonNav = [
+    { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  ]
+
+  // Customer navigation
+  const customerNav = [
+    { title: 'My Orders', href: '/dashboard/customer/orders', icon: ShoppingBag },
+    { title: 'Wishlist', href: '/dashboard/customer/wishlist', icon: Heart },
+    { title: 'Campaigns', href: '/dashboard/customer/campaigns', icon: BarChart3 },
+  ]
+
+  // Customer settings
+  const customerSettings = [
+    { title: 'Profile', href: '/dashboard/customer/profile', icon: User },
+    { title: 'Addresses', href: '/dashboard/customer/addresses', icon: MapPin },
+    { title: 'Payments', href: '/dashboard/customer/payments', icon: CreditCard },
+    { title: 'Settings', href: '/dashboard/customer/settings', icon: Settings },
+  ]
+
+  // Seller navigation
+  const sellerNav = [
+    { title: 'Store', href: '/dashboard/seller/store', icon: Store },
+    { title: 'Products', href: '/dashboard/seller/products', icon: Package },
+    { title: 'Orders', href: '/dashboard/seller/orders', icon: ShoppingBag },
+    { title: 'Customers', href: '/dashboard/seller/customers', icon: Users },
+    { title: 'Analytics', href: '/dashboard/seller/analytics', icon: BarChart3 },
+  ]
+
+  // Seller settings
+  const sellerSettings = [
+    { title: 'Store Settings', href: '/dashboard/seller/settings', icon: Settings },
+    { title: 'Notifications', href: '/dashboard/seller/notifications', icon: Bell },
+  ]
+
+  // Admin navigation
+  const adminNav = [
+    { title: 'Users', href: '/dashboard/admin/users', icon: Users },
+    { title: 'Sellers', href: '/dashboard/admin/sellers', icon: Store },
+    { title: 'Products', href: '/dashboard/admin/products', icon: Package },
+    { title: 'Orders', href: '/dashboard/admin/orders', icon: ShoppingBag },
+    { title: 'Analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
+  ]
+
+  // Admin settings
+  const adminSettings = [
+    { title: 'System Settings', href: '/dashboard/admin/settings', icon: Settings },
+    { title: 'Logs', href: '/dashboard/admin/logs', icon: FileText },
+    { title: 'Help & Support', href: '/dashboard/admin/support', icon: HelpCircle },
+  ]
+
+  // Get navigation items based on role
   const getNavItems = () => {
     switch (role) {
       case 'admin':
-        return adminNavItems
+        return [...commonNav, ...adminNav]
       case 'seller':
-        return sellerNavItems
+        return [...commonNav, ...sellerNav]
+      case 'customer':
+        return [...commonNav, ...customerNav]
       default:
-        return customerNavItems
+        return commonNav
+    }
+  }
+
+  // Get settings items based on role
+  const getSettingsItems = () => {
+    switch (role) {
+      case 'admin':
+        return adminSettings
+      case 'seller':
+        return sellerSettings
+      case 'customer':
+        return customerSettings
+      default:
+        return []
     }
   }
 
   const navItems = getNavItems()
+  const settingsItems = getSettingsItems()
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut()
-      toast.success('Signed out successfully')
-      router.push('/login')
-    } catch (error) {
-      toast.error('Error signing out')
+  const isActive = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === '/dashboard'
     }
+    return pathname.startsWith(href)
   }
 
-  // Check if current path is the main dashboard/products page
-  const isMainDashboard = pathname === '/dashboard'
-
   return (
-    <aside className={cn(
-      "sticky top-0 h-screen border-r bg-background transition-all duration-300",
-      collapsed ? "w-16" : "w-64"
-    )}>
-      <div className="flex h-full flex-col">
-        {/* Header */}
-        <div className={cn(
-          "flex items-center border-b p-4",
-          collapsed ? "justify-center" : "justify-between"
-        )}>
-          {!collapsed && (
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <ShoppingBag className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-bold text-xl">MarketHub</span>
-            </Link>
+    <div className="h-full flex flex-col bg-background">
+      {/* Toggle Button */}
+      <div className="p-4 border-b">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
+          className="w-full justify-start"
+        >
+          {sidebarOpen ? (
+            <>
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Collapse
+            </>
+          ) : (
+            <ChevronRight className="h-4 w-4" />
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCollapsed(!collapsed)}
-            className="ml-auto"
-          >
-            {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+        </Button>
+      </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
+      {/* Navigation */}
+      <div className="flex-1 overflow-y-auto py-4">
+        <nav className="space-y-1 px-3">
           {navItems.map((item) => {
             const Icon = item.icon
-            
-            // Check if this item is active
-            let isActive = false
-            if (item.href === '/dashboard') {
-              // For main dashboard, check exact match
-              isActive = pathname === '/dashboard'
-            } else {
-              // For other pages, check if path starts with the href
-              isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-            }
+            const active = isActive(item.href)
             
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent hover:text-accent-foreground",
-                  isActive ? "bg-accent text-accent-foreground font-medium" : "text-muted-foreground",
-                  collapsed ? "justify-center" : "justify-start",
-                  // Highlight main products page differently
-                  item.href === '/dashboard' && "border-l-4 border-primary"
+                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground",
+                  !sidebarOpen && "justify-center"
                 )}
+                title={!sidebarOpen ? item.title : undefined}
               >
-                <Icon className="h-4 w-4" />
-                {!collapsed && (
-                  <div className="flex-1 flex items-center justify-between">
-                    <span>{item.label}</span>
-                    {item.href === '/dashboard' && isMainDashboard && (
-                      <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                        Main
-                      </span>
-                    )}
-                  </div>
-                )}
+                <Icon className={cn("h-4 w-4", sidebarOpen && "mr-3")} />
+                {sidebarOpen && item.title}
               </Link>
             )
           })}
         </nav>
 
-        {/* Quick Actions (Only show when not collapsed) */}
-        {!collapsed && (
-          <div className="px-4 py-3 border-t">
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Quick Actions</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Link href="/dashboard">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start h-8 text-xs"
-                  >
-                    <ShoppingBag className="h-3 w-3 mr-1" />
-                    Shop
-                  </Button>
-                </Link>
-                {role === 'seller' && (
-                  <Link href="/dashboard/seller/products/new">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                    >
-                      <Package className="h-3 w-3 mr-1" />
-                      Add Product
-                    </Button>
-                  </Link>
-                )}
-                {role === 'customer' && (
-                  <Link href="/dashboard/customer/orders">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                    >
-                      <ShoppingCart className="h-3 w-3 mr-1" />
-                      My Orders
-                    </Button>
-                  </Link>
-                )}
-                {role === 'admin' && (
-                  <Link href="/dashboard/admin/users">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                    >
-                      <Users className="h-3 w-3 mr-1" />
-                      Manage Users
-                    </Button>
-                  </Link>
-                )}
-              </div>
+        {settingsItems.length > 0 && (
+          <div className="mt-8 px-3">
+            <div className={cn(
+              "px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
+              !sidebarOpen && "text-center"
+            )}>
+              {sidebarOpen ? "Settings" : "⚙️"}
             </div>
+            <nav className="space-y-1 mt-2">
+              {settingsItems.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.href)
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-accent hover:text-accent-foreground",
+                      !sidebarOpen && "justify-center"
+                    )}
+                    title={!sidebarOpen ? item.title : undefined}
+                  >
+                    <Icon className={cn("h-4 w-4", sidebarOpen && "mr-3")} />
+                    {sidebarOpen && item.title}
+                  </Link>
+                )
+              })}
+            </nav>
           </div>
         )}
+      </div>
 
-        {/* User Profile & Logout */}
-        <div className="border-t p-4">
+      {/* Role Badge */}
+      <div className="p-4 border-t">
+        <div className={cn(
+          "flex items-center justify-center",
+          !sidebarOpen && "flex-col"
+        )}>
           <div className={cn(
-            "flex items-center gap-3",
-            collapsed ? "justify-center" : "justify-start"
+            "px-2 py-1 rounded-full text-xs font-medium",
+            role === 'admin' && "bg-red-100 text-red-800",
+            role === 'seller' && "bg-blue-100 text-blue-800",
+            role === 'customer' && "bg-green-100 text-green-800"
           )}>
-            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-4 w-4 text-primary" />
-            </div>
-            {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">User Profile</p>
-                <p className="text-xs text-muted-foreground capitalize">{role}</p>
-              </div>
-            )}
+            {sidebarOpen ? role.toUpperCase() : role.charAt(0).toUpperCase()}
           </div>
-          
-          <Button
-            variant="ghost"
-            size={collapsed ? "icon" : "default"}
-            onClick={handleSignOut}
-            className={cn(
-              "mt-4 w-full",
-              collapsed ? "justify-center" : "justify-start"
-            )}
-          >
-            <LogOut className="h-4 w-4" />
-            {!collapsed && <span className="ml-2">Sign Out</span>}
-          </Button>
+          {sidebarOpen && (
+            <span className="ml-2 text-sm text-muted-foreground">
+              {role === 'admin' && 'Administrator'}
+              {role === 'seller' && 'Seller Account'}
+              {role === 'customer' && 'Customer Account'}
+            </span>
+          )}
         </div>
       </div>
-    </aside>
+    </div>
   )
 }

@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -15,56 +16,64 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            supabaseResponse.cookies.set(name, value, options)
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
           })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Refresh session if expired
+  const { data: { session } } = await supabase.auth.getSession()
 
-  // Auth routes that should be accessible only to logged out users
-  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password']
-  if (authRoutes.includes(request.nextUrl.pathname)) {
-    if (user) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
-    return supabaseResponse
+  // Define public routes
+  const publicRoutes = ['/', '/login', '/register', '/verify', '/forgot-password', '/reset-password', '/terms', '/privacy']
+  const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+
+  // If no session and trying to access protected route, redirect to login
+  if (!session && !isPublicRoute && !request.nextUrl.pathname.startsWith('/auth/callback')) {
+    const redirectUrl = new URL('/login', request.url)
+    redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
+    return NextResponse.redirect(redirectUrl)
   }
 
-  // Protected routes
-  const protectedRoutes = ['/dashboard', '/profile', '/settings', '/seller']
-  if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
-    if (!user) {
-      const redirectUrl = new URL('/login', request.url)
-      redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
-      return NextResponse.redirect(redirectUrl)
-    }
+  // If user is authenticated and trying to access auth pages, redirect to dashboard
+  if (session && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register'))) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
 
-    // Role-based access control
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+  // Check role-based access for dashboard routes
+  if (session && request.nextUrl.pathname.startsWith('/dashboard')) {
+    try {
+      const { data: user } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single()
 
-    // Seller routes
-    if (request.nextUrl.pathname.startsWith('/seller')) {
-      if (userData?.role !== 'seller' && userData?.role !== 'admin') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url))
+      if (user) {
+        const path = request.nextUrl.pathname
+        
+        // Role-based route restrictions
+        if (user.role === 'customer' && path.startsWith('/dashboard/seller')) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
+        
+        if (user.role === 'customer' && path.startsWith('/dashboard/admin')) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
+        
+        if (user.role === 'seller' && path.startsWith('/dashboard/admin')) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
       }
-    }
-
-    // Admin routes
-    if (request.nextUrl.pathname.startsWith('/admin')) {
-      if (userData?.role !== 'admin') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url))
-      }
+    } catch (error) {
+      console.error('Middleware role check error:', error)
     }
   }
 
@@ -73,6 +82,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|images).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
