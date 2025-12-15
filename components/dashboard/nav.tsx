@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Search, Bell, ShoppingCart, Menu, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Search, Bell, ShoppingCart, Menu, X, User, Settings, HelpCircle, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { 
@@ -14,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
+import { createBrowserClient } from '@supabase/ssr'
 
 interface DashboardNavbarProps {
   user: any
@@ -21,6 +23,68 @@ interface DashboardNavbarProps {
 
 export default function DashboardNavbar({ user }: DashboardNavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const router = useRouter()
+  
+  // Create browser client for client-side operations
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut()
+      router.push('/login')
+      router.refresh()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
+  }
+
+  const userRole = user?.role || 'customer'
+  const userName = user?.user_metadata?.full_name || user?.email || 'User'
+  const userInitial = userName.charAt(0).toUpperCase()
+
+  // Mobile menu items based on user role
+  const mobileMenuItems = [
+    {
+      href: `/${userRole}`,
+      label: 'Dashboard',
+    },
+    ...(userRole === 'customer' ? [
+      { href: '/customer/orders', label: 'My Orders' },
+      { href: '/customer/wishlist', label: 'Wishlist' },
+      { href: '/customer/cart', label: 'Cart' },
+      { href: '/customer/profile', label: 'Profile' },
+    ] : []),
+    ...(userRole === 'seller' ? [
+      { href: '/seller/products', label: 'Products' },
+      { href: '/seller/orders', label: 'Orders' },
+      { href: '/seller/analytics', label: 'Analytics' },
+      { href: '/seller/profile', label: 'Profile' },
+    ] : []),
+    ...(userRole === 'admin' ? [
+      { href: '/admin/users', label: 'Users' },
+      { href: '/admin/sellers', label: 'Sellers' },
+      { href: '/admin/products', label: 'Products' },
+      { href: '/admin/profile', label: 'Profile' },
+    ] : []),
+    // Common links
+    { href: '/help', label: 'Help & Support' },
+    { href: '#', label: 'Sign Out', onClick: handleSignOut, isButton: true },
+  ]
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      const searchPath = userRole === 'customer' 
+        ? `/search?q=${encodeURIComponent(searchQuery)}`
+        : `/${userRole}/search?q=${encodeURIComponent(searchQuery)}`
+      router.push(searchPath)
+      setSearchQuery('')
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -37,6 +101,7 @@ export default function DashboardNavbar({ user }: DashboardNavbarProps) {
           ) : (
             <Menu className="h-5 w-5" />
           )}
+          <span className="sr-only">Toggle menu</span>
         </Button>
 
         {/* Logo */}
@@ -49,28 +114,34 @@ export default function DashboardNavbar({ user }: DashboardNavbarProps) {
 
         {/* Search Bar */}
         <div className="flex-1 mx-4">
-          <div className="relative w-full max-w-md">
+          <form onSubmit={handleSearch} className="relative w-full max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search products, orders, customers..."
               className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
+          </form>
         </div>
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Cart */}
-          <Button variant="ghost" size="icon" className="relative">
-            <ShoppingCart className="h-5 w-5" />
-            <Badge 
-              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-              variant="destructive"
-            >
-              3
-            </Badge>
-          </Button>
+          {/* Cart - Only show for customers */}
+          {userRole === 'customer' && (
+            <Button variant="ghost" size="icon" className="relative" asChild>
+              <Link href="/customer/cart">
+                <ShoppingCart className="h-5 w-5" />
+                <Badge 
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                  variant="destructive"
+                >
+                  3
+                </Badge>
+              </Link>
+            </Button>
+          )}
 
           {/* Notifications */}
           <DropdownMenu>
@@ -102,16 +173,11 @@ export default function DashboardNavbar({ user }: DashboardNavbarProps) {
                   <span className="text-xs text-muted-foreground">1 hour ago</span>
                 </div>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <div className="flex flex-col">
-                  <span className="font-medium">New customer registered</span>
-                  <span className="text-sm text-muted-foreground">Jane Smith joined the platform</span>
-                  <span className="text-xs text-muted-foreground">3 hours ago</span>
-                </div>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center text-primary">
-                View all notifications
+              <DropdownMenuItem asChild>
+                <Link href={`/${userRole}/notifications`} className="justify-center text-primary">
+                  View all notifications
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -122,15 +188,15 @@ export default function DashboardNavbar({ user }: DashboardNavbarProps) {
               <Button variant="ghost" className="gap-2">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-sm font-medium">
-                    {user?.user_metadata?.full_name?.[0] || 'U'}
+                    {userInitial}
                   </span>
                 </div>
                 <div className="hidden md:flex flex-col items-start">
                   <span className="text-sm font-medium">
-                    {user?.user_metadata?.full_name || 'User'}
+                    {userName}
                   </span>
                   <span className="text-xs text-muted-foreground capitalize">
-                    {user?.role || 'customer'}
+                    {userRole}
                   </span>
                 </div>
               </Button>
@@ -139,22 +205,29 @@ export default function DashboardNavbar({ user }: DashboardNavbarProps) {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/${user?.role || 'customer'}/profile`}>
+                <Link href={`/${userRole}/profile`} className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
                   Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/${user?.role || 'customer'}/settings`}>
+                <Link href={`/${userRole}/settings`} className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
                   Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/help">
+                <Link href="/help" className="flex items-center gap-2">
+                  <HelpCircle className="h-4 w-4" />
                   Help & Support
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem 
+                className="text-destructive flex items-center gap-2 cursor-pointer"
+                onClick={handleSignOut}
+              >
+                <LogOut className="h-4 w-4" />
                 Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -165,68 +238,30 @@ export default function DashboardNavbar({ user }: DashboardNavbarProps) {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t">
-          <div className="p-4 space-y-2">
-            <Link
-              href={`/dashboard/${user?.role || 'customer'}`}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <span>Dashboard</span>
-            </Link>
-            {user?.role === 'customer' && (
-              <>
+          <div className="p-4 space-y-1">
+            {mobileMenuItems.map((item) => (
+              item.isButton ? (
+                <button
+                  key={item.label}
+                  className="flex items-center px-3 py-2 rounded-lg hover:bg-accent transition-colors w-full text-left text-destructive"
+                  onClick={() => {
+                    item.onClick?.()
+                    setMobileMenuOpen(false)
+                  }}
+                >
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              ) : (
                 <Link
-                  href="/dashboard/customer/orders"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center px-3 py-2 rounded-lg hover:bg-accent transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <span>My Orders</span>
+                  <span className="font-medium">{item.label}</span>
                 </Link>
-                <Link
-                  href="/dashboard/customer/wishlist"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span>Wishlist</span>
-                </Link>
-              </>
-            )}
-            {user?.role === 'seller' && (
-              <>
-                <Link
-                  href="/dashboard/seller/products"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span>Products</span>
-                </Link>
-                <Link
-                  href="/dashboard/seller/orders"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span>Orders</span>
-                </Link>
-              </>
-            )}
-            {user?.role === 'admin' && (
-              <>
-                <Link
-                  href="/dashboard/admin/users"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span>Users</span>
-                </Link>
-                <Link
-                  href="/dashboard/admin/sellers"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span>Sellers</span>
-                </Link>
-              </>
-            )}
+              )
+            ))}
           </div>
         </div>
       )}
