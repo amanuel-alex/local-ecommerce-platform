@@ -1,44 +1,39 @@
+import 'server-only'
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
-import { prisma } from '@/lib/prisma'
 
-// Get user role from database
+// Server-side function to get user role
 export async function getUserRole(userId: string): Promise<string> {
   try {
-    // Check in admin table
-    const admin = await prisma.admin.findUnique({
-      where: { userId },
-      select: { id: true }
-    })
-    if (admin) return 'admin'
+    const supabase = await createClient()
+    
+    const { data: userData, error } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', userId)
+      .single()
 
-    // Check in seller table
-    const seller = await prisma.seller.findUnique({
-      where: { userId },
-      select: { id: true }
-    })
-    if (seller) return 'seller'
-
-    // Check in customer table
-    const customer = await prisma.customer.findUnique({
-      where: { userId },
-      select: { id: true }
-    })
-    if (customer) return 'customer'
-
-    // Default to customer if no specific role found
-    return 'customer'
+    if (error) {
+      console.warn('Server: Error fetching user role:', error)
+      return 'customer'
+    }
+    
+    return userData?.role || 'customer'
   } catch (error) {
-    console.error('Error fetching user role:', error)
-    return 'customer' // Default fallback
+    console.error('Server: Unexpected error in getUserRole:', error)
+    return 'customer'
   }
 }
 
-// Get current user with role
-export async function getCurrentUser() {
+// Get current user with role (server-side)
+export async function getCurrentUserWithRole() {
   try {
-    const supabase = createClient()
-    const { data: { user } } = await (await supabase).auth.getUser()
+    const supabase = await createClient()
+    const { data: { user }, error } = await supabase.auth.getUser()
+    
+    if (error) {
+      console.warn('Server: Auth getUser error:', error)
+      return null
+    }
     
     if (!user) return null
 
@@ -50,45 +45,14 @@ export async function getCurrentUser() {
       user_metadata: user.user_metadata || {}
     }
   } catch (error) {
-    console.error('Error getting current user:', error)
+    console.error('Server: Error getting current user:', error)
     return null
   }
 }
 
-// Check if user is authenticated and has required role
-export async function checkAuth(requiredRole?: string) {
-  const user = await getCurrentUser()
-  
-  if (!user) {
-    return { 
-      authorized: false, 
-      redirect: '/auth/login' 
-    }
-  }
-
-  if (requiredRole && user.role !== requiredRole) {
-    // Redirect to appropriate dashboard based on actual role
-    let redirectTo = '/'
-    switch (user.role) {
-      case 'admin':
-        redirectTo = '/dashboard/admin'
-        break
-      case 'seller':
-        redirectTo = '/dashboard/seller'
-        break
-      case 'customer':
-        redirectTo = '/dashboard/customer'
-        break
-    }
-    
-    return { 
-      authorized: false, 
-      redirect: redirectTo 
-    }
-  }
-
-  return { 
-    authorized: true, 
-    user 
-  }
+// Check if user is authenticated
+export async function isAuthenticated() {
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  return !!session
 }

@@ -22,20 +22,17 @@ export default function AuthLayout({
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-secondary/10" />
         
         <div className="relative z-10">
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-3 group mb-12 md:mb-16 transition-all duration-300 hover:scale-[1.02]"
-          >
+         
             <div className="relative">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/30 transition-shadow duration-300">
-                <Sparkles className="w-6 h-6 text-white" />
+                {/* <Sparkles className="w-6 h-6 text-white" />/ */}
               </div>
               <div className="absolute -inset-2 rounded-xl bg-primary/20 blur-xl group-hover:bg-primary/30 transition-all duration-300" />
             </div>
-            <span className="text-3xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent">
+            <span className="text-3xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text  text-slate-300">
               Local Market
             </span>
-          </Link>
+         
           
           <div className="max-w-xl space-y-8 mt-8 md:mt-16">
             <div className="space-y-4">

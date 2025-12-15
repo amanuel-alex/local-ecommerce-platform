@@ -13,12 +13,15 @@ export async function getUserRoleClient(userId: string): Promise<string> {
       .eq('id', userId)
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.warn('Error fetching user role:', error)
+      return 'customer' // Default fallback
+    }
     
     return userData?.role || 'customer'
   } catch (error) {
-    console.error('Error fetching user role:', error)
-    return 'customer' // Default fallback
+    console.error('Unexpected error in getUserRoleClient:', error)
+    return 'customer'
   }
 }
 
@@ -26,7 +29,12 @@ export async function getUserRoleClient(userId: string): Promise<string> {
 export async function getUserWithRoleClient() {
   try {
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error } = await supabase.auth.getUser()
+    
+    if (error) {
+      console.warn('Auth getUser error:', error)
+      return null
+    }
     
     if (!user) return null
 
