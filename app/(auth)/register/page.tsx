@@ -169,7 +169,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Registration Form */}
-        <div className="bg-card rounded-xl border shadow-sm p-6 space-y-6">
+        <div className="bg-card rounded-xl  shadow-sm p-6 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name */}
             <div className="space-y-2.5">
@@ -341,14 +341,11 @@ export default function RegisterPage() {
                 disabled={loading}
               />
               <Label htmlFor="terms" className="text-sm text-muted-foreground font-normal">
-                I agree to the{' '}
+                I agree to the
                 <Link href="/terms" className="text-primary hover:underline">
                   Terms & Conditions
                 </Link>{' '}
-                and{' '}
-                <Link href="/privacy" className="text-primary hover:underline">
-                  Privacy Policy
-                </Link>
+               
               </Label>
             </div>
 

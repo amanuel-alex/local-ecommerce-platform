@@ -24,7 +24,7 @@ export default function VerifyEmailPage() {
     const checkVerification = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user?.email_confirmed_at) {
-        router.push('/dashboard')
+        router.push('/')
       }
     }
     
